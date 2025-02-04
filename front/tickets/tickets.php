@@ -113,11 +113,38 @@ Session::checkRight("profile", READ);
 		$abertos = $data['total']; 
 		
 		//insert if not exist entity
-		$query_i = "
-		INSERT IGNORE INTO glpi_plugin_dashboard_count (type, id, quant) 
-		VALUES ('1','". $ent ."', '" . $abertos ."')  ";
+		//$query_i = "
+		//INSERT IGNORE INTO glpi_plugin_dashboard_count (type, id, quant) 
+		//VALUES ('1','". $ent ."', '" . $abertos ."')  ";
 		
-		$result_i = $DB->query($query_i);
+		//$result_i = $DB->query($query_i);
+		//
+		
+		// Adicionado por Rogerio para resolver erros de SQL causados pelo dashboard
+		// Assuming $ent is a comma-separated list of entity IDs
+		$entities = explode(',', $ent);
+
+		foreach ($entities as $singleEnt) {
+		    $singleEnt = trim($singleEnt); // Remove any whitespace
+		    // Optionally, cast to integer to ensure proper format:
+		    $singleEnt = (int)$singleEnt;
+
+		    //$query_i = "INSERT IGNORE INTO glpi_plugin_dashboard_count (type, id, quant)
+		    //            VALUES ('1', '$singleEnt', '$abertos')";
+
+		   $query_i = "
+				INSERT INTO glpi_plugin_dashboard_count (type, id, quant)
+				VALUES ('1', '".$singleEnt."', '".$abertos."')
+				ON DUPLICATE KEY UPDATE quant = VALUES(quant)";
+
+
+		    $result_i = $DB->query($query_i);
+		    if (!$result_i) {
+		        // Optionally log the error for further debugging
+		        error_log("Failed to insert entity ID $singleEnt: " . $DB->error());
+		    }
+		}
+
 		
 		// get quantity
 		$query = "SELECT quant 
