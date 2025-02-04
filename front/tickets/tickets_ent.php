@@ -96,9 +96,14 @@ Session::checkRight("profile", READ);
 			$abertos = $data['total']; 
 			
 			//insert if not exist entity
-			$query_i = "
-			INSERT IGNORE INTO glpi_plugin_dashboard_count (type, id, quant) 
-			VALUES ('2','". $ent ."', '" . $abertos ."')  ";
+			//$query_i = "
+			//INSERT IGNORE INTO glpi_plugin_dashboard_count (type, id, quant) 
+			//VALUES ('2','". $ent ."', '" . $abertos ."')  ";
+                        $query_i = "
+                        INSERT INTO glpi_plugin_dashboard_count (type, id, quant)
+			VALUES ('2','". $ent ."', '" . $abertos ."')
+			ON DUPLICATE KEY UPDATE quant = VALUES(quant)";
+
 			
 			$result_i = $DB->query($query_i);
 			
